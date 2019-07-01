@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/dt/dt-1.10.18/datatables.min.css" />
+  <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.19/css/jquery.dataTables.min.css" />
+</head>
+
+<body>
+
+  <div class="widget-container">
+  <table id="table" class="display" style="width:100%">
+    <thead>
+      <tr>
+        <th>Currency</th>
+        <th>Date</th>
+        <th>Spread</th>
+        <th>Ask</th>
+        <th>Bid</th>
+    </thead>
+  </table>
+
+  <script src="https://code.jquery.com/jquery-latest.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.min.js"></script>
+
+  <script src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js"></script>
+  <script type="text/javascript" src="https://cdn.datatables.net/v/dt/dt-1.10.18/datatables.min.js"></script>
+  </div>
+
+  <script>
+    jQuery(document).ready(function($) {
+      // Reloade page evry 10 sec
+      setInterval('window.location.reload()', 10000);
+      jQuery.ajax({
+        url: "https://webrates.truefx.com/rates/connect.html?f=csv",
+        type: "GET",
+        success: function(response) {
+          var dataSet = [];
+          //Split and trim by lines. Also check if is not a line or is null return undifiend
+          //Create foreach to push in dataSet
+          response.split('\n').map(function(line) {
+            line = line ? line.trim() : "";
+            var items = line.split(',');
+            if (!line || line == "") return void 0;
+            return {
+              currency: items[0],
+              date: moment(parseInt(items[1])).format("YYYY-MM-DD HH:mm:ss"),
+              spread: items[2],
+              ask: items[3],
+              bid: items[4],
+            };
+          }).forEach(function(line) {
+            if (line != void 0) dataSet.push(line);
+          });
+
+          //Insert data in DataTable
+          $('#table').DataTable({
+            "responsive": true,
+            "data": dataSet,
+            "columns": [{
+                "data": "currency"
+              },
+              {
+                "data": "date"
+              },
+              {
+                "data": "spread"
+              },
+              {
+                "data": "ask"
+              },
+              {
+                "data": "bid"
+              }
+            ],
+            "order": [[0, "asc"]]
+          });
+        }
+      })
+    });
+  </script>
+
+</body>
+
+</html>
